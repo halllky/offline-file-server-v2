@@ -1,0 +1,13 @@
+{
+  "name": "20220709_offline-file-server",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "node ./src/main.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.1"
+  }
+}

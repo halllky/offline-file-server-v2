@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Offline File Server</title>
+</head>
+
+<body>
+  <!-- アップロード -->
+  <label>
+    <input type="file" id="upload-input" multiple style="display: none">
+    アップロードする
+  </label>
+
+  <!-- スマホからファイルサーバーのURLにアクセスする -->
+  <label style="display: block">
+    host <input type="text" id="input-host" value="192.168.100.106" oninput="updateQrCode()">
+  </label>
+  <label style="display: block">
+    port <input type="text" id="input-port" value="12345" oninput="updateQrCode()">
+  </label>
+  <div id="qrcode-display"></div>
+
+  <!-- ライセンス表示 -->
+  <p>
+    License
+    https://github.com/axios/axios
+    https://github.com/davidshimjs/qrcodejs
+  </p>
+</body>
+
+<script src="axios.min.js"></script>
+<script src="qrcode.min.js"></script>
+<script type="text/javascript">
+  /** スマホからファイルサーバーのURLにアクセスするQRコードの生成 */
+  function updateQrCode() {
+    const host = document.getElementById('input-host').value
+    const port = document.getElementById('input-port').value
+    const el = document.getElementById('qrcode-display')
+    el.innerHTML = ''
+    new QRCode(el, {
+      text: `http://${host}:${port}/`,
+      width: 128,
+      height: 128,
+      colorDark: '#000000',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.H,
+    })
+  }
+
+  /** アップロード */
+  document.getElementById('upload-input').addEventListener('change', ev => {
+    const list = ev.target.files
+    for (let index = 0; index < list.length; index++) {
+      const item = list.item(index)
+      if (!item) continue
+      const uploadItem = { file: item, name: item.name, path: '', uploading: true }
+      console.log('アップロード開始: ', item.name)
+      const fr = new FileReader()
+      fr.onload = () => axios
+        .post('/upload', { fileName: item.name, data: fr.result })
+        .then(response => { uploadItem.uploading = false })
+        .catch(error => alert(error.response.data))
+      fr.readAsDataURL(new Blob([item]))
+    }
+  })
+
+  // 画面初期表示時
+  updateQrCode()
+
+</script>
+
+</html>
